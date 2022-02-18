@@ -12,7 +12,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:label="notasflutter">
+        android:label="Notas ISADATA">
 
         <service
             android:name=".testservice"

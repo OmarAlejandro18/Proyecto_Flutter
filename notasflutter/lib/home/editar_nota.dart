@@ -23,6 +23,7 @@ class EditarNota extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Editar Nota"),
+        centerTitle: true,
       ),
       body: _Formulario(_nota),
     );
@@ -60,49 +61,69 @@ class _Formulario extends StatelessWidget {
       padding: EdgeInsets.only(
         right: margen,
         left: margen,
-        top: 12,
+        top: 25,
       ),
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
-              Row(children: [
-                const Text(
-                  "Notificación",
-                  style: TextStyle(fontSize: 16),
-                ),
-                const SizedBox(
-                  width: 176,
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.notification_add_sharp,
-                    size: 27,
+              Row(
+                children: [
+                  const Text(
+                    "Notificación",
+                    style: TextStyle(fontSize: 16),
                   ),
-                  onPressed: () {
-                    alarma = "false";
-                    _activarAlarma.text = alarma;
-
-                    _showDialog(context);
-                  },
-                  autofocus: false,
-                ),
-              ]),
-              const SizedBox(
-                height: 8,
+                  const SizedBox(
+                    width: 176,
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.notification_add_sharp,
+                      size: 27,
+                    ),
+                    onPressed: () {
+                      alarma = "false";
+                      _activarAlarma.text = alarma;
+                      _showDialog(context);
+                    },
+                    autofocus: false,
+                  ),
+                ],
               ),
+              const SizedBox(height: 20),
               _formTitulo(),
               const SizedBox(
-                height: 10,
+                height: 20,
               ),
               _formDescripcion(),
               const SizedBox(
-                height: 10,
+                height: 20,
               ),
-              _formColor(context),
+              Row(
+                children: [
+                  const Text(
+                    "Color Nota",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(
+                    width: 185,
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.border_color_sharp,
+                      size: 30,
+                    ),
+                    onPressed: () {
+                      _showColorDialog(context);
+                      FocusScope.of(context).unfocus();
+                    },
+                    autofocus: false,
+                  ),
+                ],
+              ),
               const SizedBox(
-                height: 15,
+                height: 20,
               ),
               ElevatedButton.icon(
                 label: const Text("Actualizar"),
@@ -113,23 +134,6 @@ class _Formulario extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  TextFormField _formColor(BuildContext context) {
-    return TextFormField(
-      controller: _colorController,
-      decoration: const InputDecoration(
-        labelText: "Color de Nota",
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(20)),
-        ),
-      ),
-      onTap: () {
-        _showColorDialog(context);
-        FocusScope.of(context).unfocus(); //oculta el teclado
-      },
-      enableInteractiveSelection: false,
     );
   }
 
@@ -174,7 +178,7 @@ class _Formulario extends StatelessWidget {
                 itemCount: colorNames.length,
                 itemBuilder: (BuildContext context, int index) {
                   return ListTile(
-                    leading: Icon(Icons.brightness_1_outlined,
+                    leading: Icon(Icons.brightness_1,
                         color: _finalcolor[colorNames[index]]),
                     title: Text(colorNames[index]),
                     onTap: () {
@@ -288,10 +292,6 @@ class _Formulario extends StatelessWidget {
       initialDate: DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2028),
-      /* builder: (context, child) {
-        return temaDatePicker(context, child);
-      },*/
-      // locale: const Locale('es','ES'),
     );
   }
 
@@ -377,7 +377,6 @@ class _Formulario extends StatelessWidget {
         hora: _horaController.text,
         boleano: _activarAlarma.text,
         color: _colorController.text,
-        //fechayhora: _fechaController.text + " " + _horaController.text,
       ));
       Navigator.pop(context);
     }

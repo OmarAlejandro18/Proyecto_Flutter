@@ -7,7 +7,9 @@ import 'package:notasflutter/providers/tema_provider.dart';
 import 'package:notasflutter/sqlite/sqlite_query.dart';
 
 main() {
-  runApp(const AppNotas());
+  runApp(
+    const AppNotas(),
+  );
 }
 
 class AppNotas extends StatelessWidget {

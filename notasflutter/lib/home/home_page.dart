@@ -25,8 +25,6 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  //Color colorCard = Color(0xFFFFFFFF);
-
   MethodChannel platform = const MethodChannel('backgroundservice');
 
   @override
@@ -156,6 +154,7 @@ class HomePageState extends State<HomePage> {
                 hora: sqLiteQuery.notas[index].hora,
                 boleano: sqLiteQuery.notas[index].boleano,
                 color: sqLiteQuery.notas[index].color)));
+            notificationsPlugin.cancel(sqLiteQuery.notas[index].id);
             sqLiteQuery.updateNotas();
           },
           child: notasPrueba(
@@ -213,10 +212,8 @@ class HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 IconButton(
-                  icon: const Icon(Icons.delete,
-                      /*color: Colors.amber,*/ size: 27),
+                  icon: const Icon(Icons.delete, size: 27),
                   onPressed: () {
-                    //sqLiteQuery.notas[index]
                     SQLiteDelete().nota((Nota(
                         id: sqLiteQuery.notas[index].id,
                         titulo: sqLiteQuery.notas[index].titulo,
@@ -225,6 +222,7 @@ class HomePageState extends State<HomePage> {
                         hora: sqLiteQuery.notas[index].hora,
                         boleano: sqLiteQuery.notas[index].boleano,
                         color: sqLiteQuery.notas[index].color)));
+                    notificationsPlugin.cancel(sqLiteQuery.notas[index].id);
                     sqLiteQuery.updateNotas();
                   },
                 ),
@@ -234,40 +232,48 @@ class HomePageState extends State<HomePage> {
                   onPressed: () =>
                       abrirEditarNota(context, sqLiteQuery.notas[index]),
                 ),
-                IconButton(
-                  key: Key(sqLiteQuery.notas[index].id.toString()),
-                  icon: sqLiteQuery.notas[index].boleano == "true"
-                      ? iconoNotificacion.icono
-                      : const Icon(Icons.notifications, color: Colors.black),
-                  onPressed: () {
-                    sqLiteQuery.notas[index].boleano =
-                        (iconoNotificacion.seleccionado = "true");
-                    SQLiteUpdate().nota(Nota(
-                        id: sqLiteQuery.notas[index].id,
-                        titulo: sqLiteQuery.notas[index].titulo,
-                        descripcion: sqLiteQuery.notas[index].descripcion,
-                        fecha: sqLiteQuery.notas[index].fecha,
-                        hora: sqLiteQuery.notas[index].hora,
-                        boleano: (sqLiteQuery.notas[index].boleano = "true"),
-                        color: sqLiteQuery.notas[index].color));
+                sqLiteQuery.notas[index].fecha != '' &&
+                        sqLiteQuery.notas[index].hora != ''
+                    ? IconButton(
+                        key: Key(sqLiteQuery.notas[index].id.toString()),
+                        splashRadius: 1.0,
+                        icon: sqLiteQuery.notas[index].boleano == "true"
+                            ? iconoNotificacion.icono
+                            : const Icon(Icons.notifications,
+                                color: Colors.black),
+                        onPressed: () {
+                          sqLiteQuery.notas[index].boleano =
+                              (iconoNotificacion.seleccionado = "true");
+                          SQLiteUpdate().nota(Nota(
+                              id: sqLiteQuery.notas[index].id,
+                              titulo: sqLiteQuery.notas[index].titulo,
+                              descripcion: sqLiteQuery.notas[index].descripcion,
+                              fecha: sqLiteQuery.notas[index].fecha,
+                              hora: sqLiteQuery.notas[index].hora,
+                              boleano: (sqLiteQuery.notas[index].boleano =
+                                  "true"),
+                              color: sqLiteQuery.notas[index].color));
 
-                    if (sqLiteQuery.notas[index].boleano == "true") {
-                      displayNotification(
-                          sqLiteQuery.notas[index].id,
-                          sqLiteQuery.notas[index].titulo,
-                          sqLiteQuery.notas[index].descripcion,
-                          DateTime.parse(sqLiteQuery.notas[index].fecha +
-                              " " +
-                              sqLiteQuery.notas[index].hora));
+                          if (sqLiteQuery.notas[index].boleano == "true") {
+                            displayNotification(
+                                sqLiteQuery.notas[index].id,
+                                sqLiteQuery.notas[index].titulo,
+                                sqLiteQuery.notas[index].descripcion,
+                                DateTime.parse(sqLiteQuery.notas[index].fecha +
+                                    " " +
+                                    sqLiteQuery.notas[index].hora));
 
-                      final snackBar = SnackBar(
-                        content: Text(
-                            "Notificacion de ${sqLiteQuery.notas[index].titulo} Activada"),
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                    }
-                  },
-                ),
+                            final snackBar = SnackBar(
+                              content: Text(
+                                  "Notificacion de ${sqLiteQuery.notas[index].titulo} Activada"),
+                            );
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
+                          }
+                        },
+                      )
+                    : const IconButton(
+                        icon: Icon(Icons.notifications_off), onPressed: null),
               ],
             ),
           ),
@@ -352,6 +358,7 @@ class HomePageState extends State<HomePage> {
 
   Future<void> startService(int index) async {
     dynamic value = await platform.invokeMethod('startService');
+    // ignore: avoid_print
     print(value);
 
     var cron = Cron();
@@ -430,7 +437,7 @@ class HomePageState extends State<HomePage> {
       }
 
       //Logica cuando la nota se redacta en el mes donde tiene 31 dias
-      if (mesActual == 1.toInt() ||
+      if (mesActual == 1 ||
           mesActual == 3 ||
           mesActual == 5 ||
           mesActual == 7 ||
@@ -461,12 +468,22 @@ class HomePageState extends State<HomePage> {
           int dia5 = diaActual + (5.toInt());
           diasMes(dia1, dia2, dia3, dia4, dia5, index);
         }
+
+        if (diaActual > 26 && diaActual < 31) {
+          int dia1 = diaActual + (1.toInt());
+          int dia2 = diaActual + (2.toInt());
+          int dia3 = diaActual + (3.toInt());
+          int dia4 = diaActual + (4.toInt());
+          int dia5 = diaActual + (5.toInt());
+          if (dia1 > 31 || dia2 > 31 || dia3 > 31 || dia4 > 31 || dia5 > 31) {
+            diasMes(dia1, dia2, dia3, dia4, dia5, index);
+          }
+        }
       }
     });
   }
 
   //Logica del Color de las notas
-
   diasMes(int dia1, int dia2, int dia3, int dia4, int dia5, int index) {
     int mesActual = DateTime.now().month.toInt();
     int diaActual = DateTime.now().day.toInt();
@@ -475,35 +492,35 @@ class HomePageState extends State<HomePage> {
 
     if (diaActual ==
             int.parse(sqLiteQuery.notas[index].fecha.substring(8, 10)) &&
-        mesActual ==
-            int.parse(sqLiteQuery.notas[index].fecha.substring(5, 7)) &&
-        sqLiteQuery.notas[index].fecha != '' &&
-        sqLiteQuery.notas[index].hora != '') {
-      setState(() {});
-      SQLiteUpdate().nota(Nota(
-          id: sqLiteQuery.notas[index].id,
-          titulo: sqLiteQuery.notas[index].titulo,
-          descripcion: sqLiteQuery.notas[index].descripcion,
-          fecha: sqLiteQuery.notas[index].fecha,
-          hora: sqLiteQuery.notas[index].hora,
-          boleano: sqLiteQuery.notas[index].boleano,
-          color: (sqLiteQuery.notas[index].color = "0xFFB71C1C")));
-    }
-
-    if (dia5 <= int.parse(sqLiteQuery.notas[index].fecha.substring(8, 10)) &&
         mesActual <=
             int.parse(sqLiteQuery.notas[index].fecha.substring(5, 7)) &&
         sqLiteQuery.notas[index].fecha != '' &&
         sqLiteQuery.notas[index].hora != '') {
       setState(() {});
-      SQLiteUpdate().nota(Nota(
-          id: sqLiteQuery.notas[index].id,
-          titulo: sqLiteQuery.notas[index].titulo,
-          descripcion: sqLiteQuery.notas[index].descripcion,
-          fecha: sqLiteQuery.notas[index].fecha,
-          hora: sqLiteQuery.notas[index].hora,
-          boleano: sqLiteQuery.notas[index].boleano,
-          color: (sqLiteQuery.notas[index].color = "0xFF1B5E20")));
+      actualizarNota(index, "0xFFB71C1C");
+    }
+
+    if ((dia5 > 30 &&
+            dia5 <=
+                int.parse(sqLiteQuery.notas[index].fecha.substring(8, 10)) &&
+            mesActual <
+                int.parse(sqLiteQuery.notas[index].fecha.substring(5, 7)) &&
+            sqLiteQuery.notas[index].fecha != '' &&
+            sqLiteQuery.notas[index].hora != '') ||
+        (dia5 > 31 &&
+            dia5 <=
+                int.parse(sqLiteQuery.notas[index].fecha.substring(8, 10)) &&
+            mesActual <
+                int.parse(sqLiteQuery.notas[index].fecha.substring(5, 7)) &&
+            sqLiteQuery.notas[index].fecha != '' &&
+            sqLiteQuery.notas[index].hora != '') ||
+        (dia5 <= int.parse(sqLiteQuery.notas[index].fecha.substring(8, 10)) &&
+            mesActual <=
+                int.parse(sqLiteQuery.notas[index].fecha.substring(5, 7)) &&
+            sqLiteQuery.notas[index].fecha != '' &&
+            sqLiteQuery.notas[index].hora != '')) {
+      setState(() {});
+      actualizarNota(index, "0xFF1B5E20");
     }
 
     if (dia4 == int.parse(sqLiteQuery.notas[index].fecha.substring(8, 10)) &&
@@ -512,14 +529,7 @@ class HomePageState extends State<HomePage> {
         sqLiteQuery.notas[index].fecha != '' &&
         sqLiteQuery.notas[index].hora != '') {
       setState(() {});
-      SQLiteUpdate().nota(Nota(
-          id: sqLiteQuery.notas[index].id,
-          titulo: sqLiteQuery.notas[index].titulo,
-          descripcion: sqLiteQuery.notas[index].descripcion,
-          fecha: sqLiteQuery.notas[index].fecha,
-          hora: sqLiteQuery.notas[index].hora,
-          boleano: sqLiteQuery.notas[index].boleano,
-          color: (sqLiteQuery.notas[index].color = "0xFF4CAF50")));
+      actualizarNota(index, "0xFF4CAF50");
     }
 
     if (dia3 == int.parse(sqLiteQuery.notas[index].fecha.substring(8, 10)) &&
@@ -528,14 +538,7 @@ class HomePageState extends State<HomePage> {
         sqLiteQuery.notas[index].fecha != '' &&
         sqLiteQuery.notas[index].hora != '') {
       setState(() {});
-      SQLiteUpdate().nota(Nota(
-          id: sqLiteQuery.notas[index].id,
-          titulo: sqLiteQuery.notas[index].titulo,
-          descripcion: sqLiteQuery.notas[index].descripcion,
-          fecha: sqLiteQuery.notas[index].fecha,
-          hora: sqLiteQuery.notas[index].hora,
-          boleano: sqLiteQuery.notas[index].boleano,
-          color: (sqLiteQuery.notas[index].color = "0xFFFFC107")));
+      actualizarNota(index, "0xFFFFC107");
     }
 
     if (dia2 == int.parse(sqLiteQuery.notas[index].fecha.substring(8, 10)) &&
@@ -544,14 +547,7 @@ class HomePageState extends State<HomePage> {
         sqLiteQuery.notas[index].fecha != '' &&
         sqLiteQuery.notas[index].hora != '') {
       setState(() {});
-      SQLiteUpdate().nota(Nota(
-          id: sqLiteQuery.notas[index].id,
-          titulo: sqLiteQuery.notas[index].titulo,
-          descripcion: sqLiteQuery.notas[index].descripcion,
-          fecha: sqLiteQuery.notas[index].fecha,
-          hora: sqLiteQuery.notas[index].hora,
-          boleano: sqLiteQuery.notas[index].boleano,
-          color: (sqLiteQuery.notas[index].color = "0xFFFF6F00")));
+      actualizarNota(index, "0xFFFF6F00");
     }
 
     if (dia1 == int.parse(sqLiteQuery.notas[index].fecha.substring(8, 10)) &&
@@ -560,15 +556,21 @@ class HomePageState extends State<HomePage> {
         sqLiteQuery.notas[index].fecha != '' &&
         sqLiteQuery.notas[index].hora != '') {
       setState(() {});
-      SQLiteUpdate().nota(Nota(
-          id: sqLiteQuery.notas[index].id,
-          titulo: sqLiteQuery.notas[index].titulo,
-          descripcion: sqLiteQuery.notas[index].descripcion,
-          fecha: sqLiteQuery.notas[index].fecha,
-          hora: sqLiteQuery.notas[index].hora,
-          boleano: sqLiteQuery.notas[index].boleano,
-          color: (sqLiteQuery.notas[index].color = "0xFFB71C1C")));
+      actualizarNota(index, "0xFFB71C1C");
     }
+  }
+
+  void actualizarNota(int index, String color) {
+    final SQLiteQuery sqLiteQuery =
+        Provider.of<SQLiteQuery>(context, listen: false);
+    SQLiteUpdate().nota(Nota(
+        id: sqLiteQuery.notas[index].id,
+        titulo: sqLiteQuery.notas[index].titulo,
+        descripcion: sqLiteQuery.notas[index].descripcion,
+        fecha: sqLiteQuery.notas[index].fecha,
+        hora: sqLiteQuery.notas[index].hora,
+        boleano: sqLiteQuery.notas[index].boleano,
+        color: (sqLiteQuery.notas[index].color = color)));
   }
 }
 

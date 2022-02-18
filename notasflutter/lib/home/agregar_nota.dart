@@ -14,7 +14,6 @@ class _AgregarNotaState extends State<AgregarNota> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        //backgroundColor: Colors.teal.shade800,
         centerTitle: true,
         title: const Text("Agregar Nota"),
       ),
@@ -58,7 +57,7 @@ class FormularioState extends State<Formulario> {
       padding: EdgeInsets.only(
         right: margen,
         left: margen,
-        top: 14,
+        top: 25,
       ),
       child: Form(
         key: _formKey,
@@ -76,7 +75,7 @@ class FormularioState extends State<Formulario> {
                 IconButton(
                   icon: const Icon(
                     Icons.notification_add_sharp,
-                    size: 27,
+                    size: 30,
                   ),
                   onPressed: () {
                     setState(() {
@@ -88,25 +87,46 @@ class FormularioState extends State<Formulario> {
                 ),
               ]),
               const SizedBox(
-                height: 8,
+                height: 25,
               ),
               _formTitulo(),
               const SizedBox(
-                height: 10,
+                height: 20,
               ),
               _formDescripcion(),
               const SizedBox(
-                height: 10,
+                height: 20,
               ),
-              _formColor(),
+              /*_formColor(),
               const SizedBox(
                 height: 15,
+              ),*/
+              Row(
+                children: [
+                  const Text(
+                    "Color Nota",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(
+                    width: 185,
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.border_color_sharp,
+                      size: 30,
+                    ),
+                    onPressed: () {
+                      showColorDialog(context);
+                      FocusScope.of(context).unfocus();
+                    },
+                    autofocus: false,
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 20,
               ),
               ElevatedButton.icon(
-                /*style: ButtonStyle(
-                   backgroundColor:MaterialStateProperty.all<Color>(Colors.white12), //Colors.amber
-                 ),*/
-                //
                 label: const Text("Agregar"),
                 icon: const Icon(Icons.save),
                 onPressed: () => _guardar(context),

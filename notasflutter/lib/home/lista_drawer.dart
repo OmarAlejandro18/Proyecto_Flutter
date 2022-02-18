@@ -20,8 +20,8 @@ class _ListaDrawerState extends State<ListaDrawer> {
 
     var info = const AboutListTile(
       child: Text("Informacion App"),
-      applicationVersion: "v.1.0.0\nby: Omar Alejandro García López",
-      applicationName: "Notas App",
+      applicationVersion: "v.1.0.0\nPor: Omar Alejandro García López",
+      applicationName: "Notas ISADATA",
       applicationIcon: Icon(Icons.pending_actions, size: 50),
       icon: Icon(Icons.info),
     );
